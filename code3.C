@@ -41,6 +41,8 @@ return f;
 
 int main(){
 
+const clock_t begin_time = clock();
+
 ofstream fout2;
 //fout.open("data2.txt");
 int n_p = 10000;
@@ -49,9 +51,13 @@ float h = 0.01;
 float m1,m2;
 float e1,a1;
 
-std::random_device rd;
-std::mt19937 eng(rd());
-std::uniform_real_distribution<>distr(2,3);
+random_device rd;
+mt19937 eng(rd());
+uniform_real_distribution<float>distr(2,3);
+
+
+default_random_engine gen;
+uniform_real_distribution<float> distribution(0.9,1.1);
 float **x3,**y3,**v_x3,**v_y3;
 
 float* t = new float[n];
@@ -91,9 +97,6 @@ v_x1[0] = -sqrt(4*pow(3.1415,2)/a1);
 v_x2[0] = 0.0;
 v_y1[0] = 0.0;
 v_y2[0] = 0.0;
-cout << v_x1[0] << endl;
-cout << v_y1[0]*v_y1[0] + v_x1[0]*v_x1[0] << endl;
-
 t[0] = 0.0;
 
 float a ;
@@ -101,12 +104,16 @@ float a ;
 for(int i = 0; i < n_p; i++){
 
 	a = distr(eng);
+
 	x3[i][0] = 0.0;
 	y3[i][0] = a;
 	v_y3[i][0] = 0.0;
 	v_x3[i][0] = -sqrt(4*pow(3.1415,2)/a);
+	v_x3[i][0] *= distribution(gen);
 }
-
+/*#pragma omp parallel
+{
+#pragma omp for*/
 for ( int i = 0 ; i < n_p ; i++){
 	for (int j=0; j<n ; j++)
 	{
@@ -132,19 +139,17 @@ for ( int i = 0 ; i < n_p ; i++){
 	}
 	}
 
-cout << v_y1[0]*v_y1[0] + v_x1[0]*v_x1[0] + 4*pi*pi*m1/(x1[0]*x1[0]+y1[0]*y1[0])<< endl;
-
 //#pragma omp for
 
 
 
 	fout2.open("distances2.txt");
 	for ( int i = 0 ; i < n_p ; i++){
-		//fout2<<sqrt(x3[i][n]*x3[i][n]+y3[i][n]*y3[i][n])<<endl;
-		fout2 << x3[i][n] << y3[i][n] << endl;
+		fout2<<sqrt(x3[i][n]*x3[i][n]+y3[i][n]*y3[i][n])<<endl;
+		//fout2 << x3[i][n] << "\t" <<y3[i][n] << endl;
 	}
 
-
+cout << "Time:" << float( clock () - begin_time ) /  CLOCKS_PER_SEC;
 
 
 
